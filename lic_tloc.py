@@ -182,7 +182,7 @@ if __name__=='__main__':
                             duration is in hours, interval is in minutes
                             """
 
-                            data = queryPayload.statsIFAgg(iterSystemIP , iterTransportIfName, duration = "2", interval = 30)
+                            data = queryPayload.statsIFAgg(iterSystemIP , iterTransportIfName, duration = "168", interval = 30)
 
                             time.sleep(1)
 
