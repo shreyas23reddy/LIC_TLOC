@@ -228,6 +228,7 @@ if __name__=='__main__':
 
         """
         Dumping report_data dic to csv file
+        need to add encryption
         """
 
         filename =  args.filename[0]
