@@ -182,9 +182,9 @@ if __name__=='__main__':
                             duration is in hours, interval is in minutes
                             """
 
-                            data = queryPayload.statsIFAgg(iterSystemIP , iterTransportIfName, duration = "168", interval = 30)
+                            data = queryPayload.statsIFAgg(iterSystemIP , iterTransportIfName, duration = "2", interval = 30)
 
-                            time.sleep(0.3)
+                            time.sleep(1)
 
 
                             print(f"pulling the interface stats of Site-ID {site_id} -- System-IP {iterSystemIP} -- TLOC parent Interface {iterTransportIfName}")
@@ -230,6 +230,8 @@ if __name__=='__main__':
         Dumping report_data dic to csv file
         need to add encryption
         """
+
+        print(report_data)
 
         filename =  args.filename[0]
         fields = [ "Site_ID-System_IP", "host-name", "uuid", "reachability", "validity", "BW-Agg-Site-Mbps","License-Tier" ]
