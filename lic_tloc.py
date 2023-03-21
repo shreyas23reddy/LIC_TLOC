@@ -81,13 +81,13 @@ if __name__=='__main__':
 
             else:
 
+                print(f"""Getting info related to SITE-ID {site_id}""")
+
                 """
                 Iterating the rx'ed data if there is more than 1 edge device in the site
                 """
 
                 for iter_deviceInfo in deviceInfo:
-
-                    print(f""" Getting info related to SITE-ID {site_id}""")
 
 
                     """
@@ -114,7 +114,7 @@ if __name__=='__main__':
 
                     if iter_deviceInfo["reachability"] == "reachable" and iter_deviceInfo["validity"] == "valid":
 
-                        print(f""" Getting WAN Parent interface info from {iter_deviceInfo["system-ip"]}""")
+                        print(f"""  Getting WAN Parent interface info from {iter_deviceInfo["system-ip"]}""")
 
                         wanIFName = getData.getWANIfName(vmanage_host,vmanage_port,header,iter_deviceInfo["system-ip"])
 
@@ -157,7 +157,7 @@ if __name__=='__main__':
 
                 if numberOfEdgeDevices == 2 and args.tlocext == "yes":
 
-                    print(f""" determine if the TLOC EXT is present""")
+                    print(f"""    ********* determine if the TLOC EXT is present ******** """)
                     report_data = findTlocExt.findIfTlocext(vmanage_host,vmanage_port,header,report_data,site_id,systemIPlst)
 
                 """
@@ -165,6 +165,7 @@ if __name__=='__main__':
                 """
 
                 BW_Site =[]
+                entry_time=[]
 
 
 
@@ -182,25 +183,42 @@ if __name__=='__main__':
                             duration is in hours, interval is in minutes
                             """
 
-                            data = queryPayload.statsIFAgg(iterSystemIP , iterTransportIfName, duration = "168", interval = 30)
+                            data = queryPayload.statsIFAgg(iterSystemIP , iterTransportIfName, duration = "1", interval = 5)
 
                             time.sleep(1)
 
-
-                            print(f"pulling the interface stats of Site-ID {site_id} -- System-IP {iterSystemIP} -- TLOC parent Interface {iterTransportIfName}")
+                            print(f"""      pulling the interface stats of Site-ID {site_id} -- System-IP {iterSystemIP} -- TLOC parent Interface {iterTransportIfName}""")
 
                             interfaceStats = postData.getInterfaceStats(vmanage_host,vmanage_port,header,data)
 
                             report_data[(str(site_id),iterSystemIP)]["wanIFName-stats"][iterTransportIfName]=interfaceStats
 
+                            #print(interfaceStats)
+
 
 
                             if (iterTransportIfName not in report_data[(str(site_id),iterSystemIP)]["TlocEXT-IfName"]):
 
-                                if  BW_Site == []:
+                                if  BW_Site == [] and entry_time == [] :
                                     for iter_interfaceStats in interfaceStats:
+                                        entry_time.append(iter_interfaceStats['entry_time'])
                                         BW_Site.append(iter_interfaceStats['tx_kbps']+iter_interfaceStats['rx_kbps'])
+                                    print(f"""      {entry_time}""")
+                                    print(f"""      {BW_Site}""")
 
+
+                                else:
+                                    for iter_interfaceStats in interfaceStats:
+                                        if iter_interfaceStats['entry_time'] in entry_time:
+                                            index = entry_time.index(iter_interfaceStats['entry_time'])
+                                            BW_Site[index] += (iter_interfaceStats['tx_kbps']+iter_interfaceStats['rx_kbps'])
+                                    print(f"""      {entry_time}""")
+                                    print(f"""      {BW_Site} cumulative stats""")
+                            else:
+                                print(f"""      interface excluded due to TlocExt {iterTransportIfName}""")
+
+
+                                """
                                 elif len(BW_Site) >= len(interfaceStats):
                                     for index,iter_interfaceStats in enumerate(interfaceStats):
                                         BW_Site[index] += (iter_interfaceStats['tx_kbps']+iter_interfaceStats['rx_kbps'])
@@ -208,6 +226,7 @@ if __name__=='__main__':
                                 else:
                                     for index in range(len(BW_Site)):
                                         BW_Site[index] += (interfaceStats[index]['tx_kbps']+interfaceStats[index]['rx_kbps'])
+                                """
 
 
 
@@ -231,7 +250,7 @@ if __name__=='__main__':
         need to add encryption
         """
 
-        print(report_data)
+        #print(report_data)
 
         filename =  args.filename[0]
         fields = [ "Site_ID-System_IP", "host-name", "uuid", "reachability", "validity", "BW-Agg-Site-Mbps","License-Tier" ]
